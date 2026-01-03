@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Security Alert</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;background:#000;color:#00ff66;
+  font-family:monospace;overflow:hidden;
+}
+#tap{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#ff3333;font-size:22px;
+}
+#screen{padding:20px;font-size:15px;line-height:1.45}
+.red{color:#ff3333}
+.green{color:#00ff66}
+.blink{animation:blink 1s infinite}
+@keyframes blink{50%{opacity:0}}
+
+#panic{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:black;
+  color:red;
+  font-size:42px;
+  font-weight:bold;
+  z-index:50;
+}
+</style>
+</head>
+<body>
+
+<div id="tap">TAP ANYWHERE</div>
+<div id="screen"></div>
+
+<div id="panic">YOUR PHONE<br>IS BEING<br>HACKED</div>
+
+<script>
+const tap = document.getElementById("tap");
+const s = document.getElementById("screen");
+const panic = document.getElementById("panic");
+
+/* ====== BEEP (NORMAL) ====== */
+let ctx, osc;
+function startBeep(){
+  ctx = new (window.AudioContext||window.webkitAudioContext)();
+  osc = ctx.createOscillator();
+  osc.type="square";
+  osc.frequency.value=750;
+  osc.connect(ctx.destination);
+  osc.start();
+  setInterval(()=>{
+    osc.frequency.value = osc.frequency.value===750?500:750;
+  },400);
+}
+
+/* ====== PANIC SOUND (DIFFERENT, DEEP) ====== */
+function panicSound(){
+  const pCtx = new (window.AudioContext||window.webkitAudioContext)();
+  const o = pCtx.createOscillator();
+  const g = pCtx.createGain();
+  o.type = "sawtooth";
+  o.frequency.value = 120;
+  g.gain.value = 0.8;
+  o.connect(g);
+  g.connect(pCtx.destination);
+  o.start();
+  setTimeout(()=>o.stop(), 2000);
+}
+
+/* ====== VOICE ====== */
+function speak(){
+  if(!window.speechSynthesis) return;
+  const u = new SpeechSynthesisUtterance(
+    "Warning. Your phone is hacked."
+  );
+  u.rate=0.75; u.pitch=0.9; u.volume=1;
+  speechSynthesis.speak(u);
+}
+
+/* ====== VIBRATION ====== */
+function vibrateStrong(){
+  if(navigator.vibrate){
+    navigator.vibrate([600,200,600,200,800]);
+  }
+}
+
+/* ====== TEXT ====== */
+const intro = [
+  "Running security diagnostics...",
+  "External control detected",
+  "",
+  "⚠ CRITICAL SECURITY EVENT ⚠",
+  "",
+  "Remote operator authenticated:",
+  "ALARK",
+  "",
+  "Initializing permission escalation..."
+];
+
+const access = [
+  "CAMERA ACCESS .......... GRANTED",
+  "MICROPHONE ACCESS ...... GRANTED",
+  "STORAGE ACCESS ......... GRANTED",
+  "CONTACTS ACCESS ........ GRANTED",
+  "LOCATION ACCESS ........ GRANTED",
+  "SMS ACCESS ............. GRANTED",
+  "WHATSAPP SESSION ....... OPEN",
+  "PHOTOS ................. INDEXING",
+  "PHONE PASSWORDS .......... GRANDTED",
+  "FULL CONTROL ........... ENABLED"
+];
+
+let i=0,j=0;
+function typeIntro(){
+  if(i<intro.length){
+    s.innerHTML+=intro[i]+"<br>";
+    i++; setTimeout(typeIntro,500);
+  }else{
+    setTimeout(typeAccess,700);
+  }
+}
+function typeAccess(){
+  if(j<access.length){
+    s.innerHTML+=`<span class="green">${access[j]}</span><br>`;
+    j++; setTimeout(typeAccess,420);
+  }else{
+    s.innerHTML+=`<br><span class="red blink">REMOTE SESSION ACTIVE</span>`;
+    speak();
+    setTimeout(finalPanic, 2500);
+  }
+}
+
+/* ====== FINAL PANIC ====== */
+function finalPanic(){
+  panic.style.display="flex";
+  panicSound();
+  vibrateStrong();
+}
+
+/* ====== START ====== */
+tap.addEventListener("click",()=>{
+  tap.remove();
+  startBeep();      // normal beep
+  typeIntro();      // visuals
+});
+</script>
+
+</body>
+</html>
