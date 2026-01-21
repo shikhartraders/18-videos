@@ -17,3 +17,21 @@ Perfect for entertainment, prank moments, and quick video launching with one tap
 ---
 
 ## 📂 Project Structure
+> (Structure may vary depending on your code, you can edit it later)
+
+---
+
+## 🛠️ Tech Used
+
+- HTML / CSS / JavaScript *(if it’s a web project)*
+- OR Android (Java / Kotlin) *(if it’s an app)*
+- GitHub for version control
+
+---
+
+## 🎯 How to Use
+
+### ✅ Option 1: Run Locally (Web)
+1. Download or clone the project:
+   ```bash
+   git clone https://github.com/shikhartraders/18-videos.git
